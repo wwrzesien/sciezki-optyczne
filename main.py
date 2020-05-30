@@ -6,7 +6,6 @@ from baza_danych import BazaDanych
 
 
 def main():
-    print("Hello")
 
     baza = BazaDanych('pol.xml')
     baza.utworz_baze()
