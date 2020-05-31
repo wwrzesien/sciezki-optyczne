@@ -3,6 +3,8 @@
 import xml.etree.ElementTree as ET
 import math
 
+BAZA_TRENING = 0.1
+
 
 class BazaDanych():
     def __init__(self, nazwa_pliku):
@@ -12,16 +14,25 @@ class BazaDanych():
         self.miasta = []
         self.polaczenia = []
         self.sciezki = []
+        self.baza_testowa = []
+        self.baza_treningowa = []
 
     def utworz_baze(self):
         """Generowanie bazy danych."""
         self.baza_miast()
         self.baza_polaczen()  # Nie jest potrzebna
         self.baza_sciezek()
+        self.generuj_baze()
 
     def baza_miast(self):
         """Utworz liste miast.
-        [{'id': '0', 'miasto': 'Gdansk', 'x': 18.6, 'y': 54.2}, ...]"""
+        [{
+            'id': '0',
+            'miasto': 'Gdansk',
+            'x': 18.6,
+            'y': 54.2
+        },
+        ...]"""
         for count, node in enumerate(self.root[0][0]):
             wiersz = {
                 'id': str(count),
@@ -29,12 +40,17 @@ class BazaDanych():
                 'x': float(node[0][0].text),
                 'y': float(node[0][1].text)
             }
-            self.miasta.append(wiersz)
+            self.miasta.append(wiersz.copy())
 
     def baza_polaczen(self):
         """Utworz liste polaczen oraz policz odleglosc na podstawie
         wspolrzednych x i y.
-        [{'nazwa': 'Link_0_10', 'start': '0', 'meta': '10', 'odleglosc': 3.12},
+        [{
+            'nazwa': 'Link_0_10',
+            'start': '0',
+            'meta': '10',
+            'odleglosc': 3.12
+        },
         ...]"""
         for node in self.root[0][1]:
             wiersz = {
@@ -46,7 +62,7 @@ class BazaDanych():
             odleglosc = self.oblicz_odleglosc(wiersz['start'], wiersz['meta'])
             wiersz['odleglosc'] = odleglosc
 
-            self.polaczenia.append(wiersz)
+            self.polaczenia.append(wiersz.copy())
 
     def oblicz_odleglosc(self, start, meta):
         """Oblicz odleglosc miedzy miastami."""
@@ -66,7 +82,16 @@ class BazaDanych():
         return round(odleglosc, 2)
 
     def baza_sciezek(self):
-        """Utworz liste sciezek, oblicz jej dlugosc oraz koszt OSNR."""
+        """Utworz liste sciezek, oblicz jej dlugosc oraz koszt OSNR.
+        [{
+            'start': 'Warsaw',
+            'meta': 'Wroclaw',
+            'id': '461',
+            'sciezka': ['10', '4', '8', '5', '0', '2', '9', '7', '11'],
+            'odleglosc': 20.66,
+            'osnr': 9.23
+        },
+        ...]"""
         count = 0
         # demand
         for node in self.root[1]:
@@ -92,9 +117,14 @@ class BazaDanych():
                 wiersz['id'] = str(count)
                 wiersz['sciezka'] = lista_miast
                 wiersz['odleglosc'] = round(odleglosc, 2)
-                wiersz['koszt'] = self.koszt_osnr(wiersz['odleglosc'])
                 count += 1
-                self.sciezki.append(wiersz)
+                self.sciezki.append(wiersz.copy())
+
+        max = self.odleglosc_max()
+        min = self.odleglosc_min()
+
+        for sciezka in self.sciezki:
+            sciezka['osnr'] = self.koszt_osnr(sciezka['odleglosc'], max, min)
 
     def id_miasta(self, nazwa):
         """Zwroc id miasta."""
@@ -103,6 +133,40 @@ class BazaDanych():
                 return miasto['id']
         return None
 
-    def koszt_osnr(self, odleglosc):
+    def generuj_baze(self):
+        """Podziel baze na testowa (90% bazy) i treningowa (10% bazy)."""
+        count = 0
+        for sciezka in self.sciezki:
+            if count % (int(1/BAZA_TRENING)) == 0:
+                self.baza_treningowa.append(sciezka.copy())
+            else:
+                self.baza_testowa.append(sciezka.copy())
+            count += 1
+
+    def koszt_osnr(self, odleglosc, max, min):
         """Oblicz OSNR, przedzial 0-50, im dluzsza sciezka tym mniejszy OSNR."""
-        return 0
+        return round(abs(((odleglosc - min) * 50) / (max - min) - 50), 2)
+
+    def odleglosc_min(self):
+        """Zwroc najkrotsza odleglosc."""
+        min = 999999
+        for sciezka in self.sciezki:
+            if sciezka['odleglosc'] < min:
+                min = sciezka['odleglosc']
+        return min
+
+    def odleglosc_max(self):
+        """Zwroc najdluzsza odleglosc."""
+        max = -999999
+        for sciezka in self.sciezki:
+            if sciezka['odleglosc'] > max:
+                max = sciezka['odleglosc']
+        return max
+
+    def najdluzsza_sciezka(self):
+        """Zwraca rozmiar najdluzszej sciezki."""
+        rozmiar = 0
+        for sciezka in self.sciezki:
+            if len(sciezka['sciezka']) > rozmiar:
+                rozmiar = len(sciezka['sciezka'])
+        return rozmiar
