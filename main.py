@@ -2,13 +2,13 @@
 # Temat: ML sciezki optyczne provisioning
 # Autor: Marcin Gajewski, Wojciech Wrzesien
 
-from baza_danych import BazaDanych
+from ann import ANN
 
 
 def main():
 
-    baza = BazaDanych('pol.xml')
-    baza.utworz_baze()
+    sieci_neuronowe = ANN()
+    sieci_neuronowe.analiza()
 
 
 if __name__ == "__main__":
