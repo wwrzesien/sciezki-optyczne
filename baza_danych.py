@@ -2,8 +2,9 @@
 
 import xml.etree.ElementTree as ET
 import math
+import random
 
-BAZA_TRENING = 0.1
+BAZA_TRENING = 0.8
 
 
 class BazaDanych():
@@ -22,7 +23,7 @@ class BazaDanych():
         self.baza_miast()
         self.baza_polaczen()  # Nie jest potrzebna
         self.baza_sciezek()
-        self.generuj_baze()
+        # self.generuj_baze()
 
     def baza_miast(self):
         """Utworz liste miast.
@@ -125,6 +126,8 @@ class BazaDanych():
 
         for sciezka in self.sciezki:
             sciezka['osnr'] = self.koszt_osnr(sciezka['odleglosc'], max, min)
+
+        random.shuffle(self.sciezki)
 
     def id_miasta(self, nazwa):
         """Zwroc id miasta."""
