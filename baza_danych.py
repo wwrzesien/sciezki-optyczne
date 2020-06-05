@@ -128,17 +128,17 @@ class BazaDanych():
 
                 # Przypadek np. Gdansk -> Warszawa
                 wiersz['id'] = str(count)
-                wiersz['sciezka'] = lista_miast[::-1]
+                wiersz['sciezka'] = lista_miast
                 wiersz['odleglosc'] = round(odleglosc, 2)
                 count += 1
                 self.sciezki.append(wiersz.copy())
 
                 # Przypadek Warszawa -> Gdansk
-                # wiersz_2['id'] = str(count)
-                # wiersz_2['sciezka'] = lista_miast
-                # wiersz_2['odleglosc'] = round(odleglosc, 2)
-                # count += 1
-                # self.sciezki.append(wiersz_2.copy())
+                wiersz_2['id'] = str(count)
+                wiersz_2['sciezka'] = lista_miast[::-1]
+                wiersz_2['odleglosc'] = round(odleglosc, 2)
+                count += 1
+                self.sciezki.append(wiersz_2.copy())
 
         max = self.odleglosc_max()
         min = self.odleglosc_min()

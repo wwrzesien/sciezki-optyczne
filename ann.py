@@ -3,8 +3,9 @@
 from baza_danych import BazaDanych
 import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
+from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
@@ -12,7 +13,6 @@ import numpy as np
 import logging
 
 GRUPA_ZAKRES = [17.04, 24.06, 29.55, 35.53]
-GRUPA_ZAKRES_2 = [19.24, 27.05, 34.01, 48]
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -20,8 +20,6 @@ logging.basicConfig(level=logging.INFO)
 
 class ANN:
     def __init__(self):
-        # self.baza_trening = {'X': np.array([]), 'y': np.array}  # {'X': [[], ...,[]], 'y':[]}
-        # self.baza_test = {'X': np.array([]), 'y': np.array}  # {'X': [[], ...,[]], 'y':[]}
         self.baza_trening = {}
         self.baza_trening_skal = {}
         self.baza_test = {}
@@ -46,16 +44,23 @@ class ANN:
         model = Sequential([
             Dense(128, input_shape=(11,), activation='relu'),
             # Dense(128, activation='relu'),
+            Dropout(0.3),
             Dense(64, activation='relu'),
-            # Dense(16, activation='relu'),
+            Dropout(0.4),
+            # Dense(32, activation='relu'),
+
+            Dense(32, activation='relu'),
+            # Dropout(0.1),
             Dense(5, activation='softmax')
         ])
+
+        # es_callback = EarlyStopping(monitor='val_loss', patience=5)
 
         # Wyswietl podsumowanie sieci
         model.summary()
 
         # Zdefiniuj optymalizator, funkcje strat itp
-        model.compile(Adam(lr=.0001), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        model.compile(Adam(lr=0.0001), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
         # Zdefiniuj dane
         model_dane = model.fit(
@@ -63,9 +68,10 @@ class ANN:
             self.baza_trening['y'],
             validation_data=(self.baza_test['X'], self.baza_test['y']),
             batch_size=10,
-            epochs=100,
+            epochs=300,
             shuffle=True,
             verbose=2
+            # callbacks=[es_callback]
         )
 
         # Przeprowadz klasyfikacje na nowych danych
