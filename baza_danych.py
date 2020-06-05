@@ -1,10 +1,15 @@
 """Generowanie z pliku xml treningowej i testowej bazy danych."""
 
 import xml.etree.ElementTree as ET
+import matplotlib.pyplot as plt
+import logging
 import math
 import random
 
 BAZA_TRENING = 0.8
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class BazaDanych():
@@ -24,6 +29,8 @@ class BazaDanych():
         self.baza_polaczen()  # Nie jest potrzebna
         self.baza_sciezek()
         # self.generuj_baze()
+        self.wyswietl()
+        random.shuffle(self.sciezki)
 
     def baza_miast(self):
         """Utworz liste miast.
@@ -100,6 +107,10 @@ class BazaDanych():
                 'start': node[0].text,
                 'meta': node[1].text
             }
+            wiersz_2 = {
+                'start': node[1].text,
+                'meta': node[0].text
+            }
             # admissiblePat
             for path in node[3]:
                 odleglosc = 0
@@ -115,11 +126,19 @@ class BazaDanych():
                     if meta not in lista_miast:
                         lista_miast.append(meta)
 
+                # Przypadek np. Gdansk -> Warszawa
                 wiersz['id'] = str(count)
-                wiersz['sciezka'] = lista_miast
+                wiersz['sciezka'] = lista_miast[::-1]
                 wiersz['odleglosc'] = round(odleglosc, 2)
                 count += 1
                 self.sciezki.append(wiersz.copy())
+
+                # Przypadek Warszawa -> Gdansk
+                # wiersz_2['id'] = str(count)
+                # wiersz_2['sciezka'] = lista_miast
+                # wiersz_2['odleglosc'] = round(odleglosc, 2)
+                # count += 1
+                # self.sciezki.append(wiersz_2.copy())
 
         max = self.odleglosc_max()
         min = self.odleglosc_min()
@@ -127,7 +146,9 @@ class BazaDanych():
         for sciezka in self.sciezki:
             sciezka['osnr'] = self.koszt_osnr(sciezka['odleglosc'], max, min)
 
-        random.shuffle(self.sciezki)
+        logger.debug('Rozmair zbioru: {}'.format(len(self.sciezki)))
+
+        # logger.debug(self.sciezki[0:5])
 
     def id_miasta(self, nazwa):
         """Zwroc id miasta."""
@@ -146,9 +167,26 @@ class BazaDanych():
                 self.baza_testowa.append(sciezka.copy())
             count += 1
 
+    def wyswietl(self):
+        self.sciezki.sort(key=lambda i: i['osnr'])
+        y = [i['osnr'] for i in self.sciezki]
+        x = [i for i in range(0, len(self.sciezki))]
+
+        rozmiar_grupy = int(len(self.sciezki)/5)
+
+        logger.debug("Rozmiar bazy: {r}, jednej grupy {g}".format(
+            r=len(self.sciezki), g=rozmiar_grupy))
+        logger.debug("Grupa I: {z}".format(z=self.sciezki[rozmiar_grupy]['osnr']))
+        logger.debug("Grupa II: {z}".format(z=self.sciezki[2*rozmiar_grupy]['osnr']))
+        logger.debug("Grupa III: {z}".format(z=self.sciezki[3*rozmiar_grupy]['osnr']))
+        logger.debug("Grupa IV: {z}".format(z=self.sciezki[4*rozmiar_grupy]['osnr']))
+
+        # plt.plot(x, y)
+        # plt.show()
+
     def koszt_osnr(self, odleglosc, max, min):
         """Oblicz OSNR, przedzial 0-50, im dluzsza sciezka tym mniejszy OSNR."""
-        return round(abs(((odleglosc - min) * 50) / (max - min) - 50), 2)
+        return round(abs(((odleglosc - min) * (50)) / (max - min) - 48), 2)
 
     def odleglosc_min(self):
         """Zwroc najkrotsza odleglosc."""
