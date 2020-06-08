@@ -5,23 +5,19 @@ import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import numpy as np
 import logging
 
 GRUPA_ZAKRES = [17.04, 24.06, 29.55, 35.53]
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('ANN')
 
 
 class ANN:
     def __init__(self):
         self.baza_trening = {}
-        self.baza_trening_skal = {}
         self.baza_test = {}
         self.baza = {}
 
@@ -43,18 +39,12 @@ class ANN:
         # Utworz siec
         model = Sequential([
             Dense(128, input_shape=(11,), activation='relu'),
-            # Dense(128, activation='relu'),
             Dropout(0.3),
             Dense(64, activation='relu'),
             Dropout(0.4),
-            # Dense(32, activation='relu'),
-
             Dense(32, activation='relu'),
-            # Dropout(0.1),
             Dense(5, activation='softmax')
         ])
-
-        # es_callback = EarlyStopping(monitor='val_loss', patience=5)
 
         # Wyswietl podsumowanie sieci
         model.summary()
@@ -71,15 +61,14 @@ class ANN:
             epochs=300,
             shuffle=True,
             verbose=2
-            # callbacks=[es_callback]
         )
 
         # Przeprowadz klasyfikacje na nowych danych
         klasyfik = model.predict_classes(self.baza_test['X'], batch_size=10, verbose=0)
 
-        print('Sciezka, prawdziwa kategoria, przewidziana kategoria')
+        logger.debug('Sciezka, prawdziwa kategoria, przewidziana kategoria')
         for p, x, y in zip(klasyfik, self.baza_test['X'], self.baza_test['y']):
-            print(x, y, p)
+            logger.debug('{} {} {}'.format(x, y, p))
 
         return model_dane.history
 
@@ -121,16 +110,10 @@ class ANN:
             test_size=0.1
         )
 
-        skaler = MinMaxScaler(feature_range=(0, 1))
-        self.baza_trening_skal['X'] = skaler.fit_transform(self.baza_trening['X'])
-
         logger.info('Liczebnosc grup zbioru treningowego: {}'
                     .format(self.liczebnosc_grup(self.baza_trening['y'])))
         logger.info('Liczebnosc grup zbioru testowego: {}'
                     .format(self.liczebnosc_grup(self.baza_test['y'])))
-
-        # self.baza_trening['X'] = tf.keras.utils.normalize(self.baza_trening['X'], axis=1)
-        # self.baza_test['X'] = tf.keras.utils.normalize(self.baza_test['X'], axis=1)
 
     def wykres(self, dane_tren, dane_test, tytul, y_etyk):
         """Narysuj wykres."""

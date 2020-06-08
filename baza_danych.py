@@ -1,4 +1,4 @@
-"""Generowanie z pliku xml treningowej i testowej bazy danych."""
+"""Generowanie bazy danych z pliku xml."""
 
 import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
@@ -6,10 +6,9 @@ import logging
 import math
 import random
 
-BAZA_TRENING = 0.8
+# BAZA_TRENING = 0.8
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('BazaDanych')
 
 
 class BazaDanych():
@@ -18,15 +17,13 @@ class BazaDanych():
         self.tree = ET.parse(self.nazwa_pliku)
         self.root = self.tree.getroot()
         self.miasta = []
-        self.polaczenia = []
         self.sciezki = []
-        self.baza_testowa = []
-        self.baza_treningowa = []
+        # self.baza_testowa = []
+        # self.baza_treningowa = []
 
     def utworz_baze(self):
         """Generowanie bazy danych."""
         self.baza_miast()
-        self.baza_polaczen()  # Nie jest potrzebna
         self.baza_sciezek()
         # self.generuj_baze()
         self.wyswietl()
@@ -49,28 +46,6 @@ class BazaDanych():
                 'y': float(node[0][1].text)
             }
             self.miasta.append(wiersz.copy())
-
-    def baza_polaczen(self):
-        """Utworz liste polaczen oraz policz odleglosc na podstawie
-        wspolrzednych x i y.
-        [{
-            'nazwa': 'Link_0_10',
-            'start': '0',
-            'meta': '10',
-            'odleglosc': 3.12
-        },
-        ...]"""
-        for node in self.root[0][1]:
-            wiersz = {
-                'nazwa': node.attrib['id'],
-                'start': node.attrib['id'][node.attrib['id'].find('_') + 1:
-                                           node.attrib['id'].find('_')+2],
-                'meta': node.attrib['id'][node.attrib['id'].find('_')+3:]
-            }
-            odleglosc = self.oblicz_odleglosc(wiersz['start'], wiersz['meta'])
-            wiersz['odleglosc'] = odleglosc
-
-            self.polaczenia.append(wiersz.copy())
 
     def oblicz_odleglosc(self, start, meta):
         """Oblicz odleglosc miedzy miastami."""
@@ -148,8 +123,6 @@ class BazaDanych():
 
         logger.debug('Rozmair zbioru: {}'.format(len(self.sciezki)))
 
-        # logger.debug(self.sciezki[0:5])
-
     def id_miasta(self, nazwa):
         """Zwroc id miasta."""
         for miasto in self.miasta:
@@ -157,15 +130,15 @@ class BazaDanych():
                 return miasto['id']
         return None
 
-    def generuj_baze(self):
-        """Podziel baze na testowa (90% bazy) i treningowa (10% bazy)."""
-        count = 0
-        for sciezka in self.sciezki:
-            if count % (int(1/BAZA_TRENING)) == 0:
-                self.baza_treningowa.append(sciezka.copy())
-            else:
-                self.baza_testowa.append(sciezka.copy())
-            count += 1
+    # def generuj_baze(self):
+    #     """Podziel baze na testowa (90% bazy) i treningowa (10% bazy)."""
+    #     count = 0
+    #     for sciezka in self.sciezki:
+    #         if count % (int(1/BAZA_TRENING)) == 0:
+    #             self.baza_treningowa.append(sciezka.copy())
+    #         else:
+    #             self.baza_testowa.append(sciezka.copy())
+    #         count += 1
 
     def wyswietl(self):
         self.sciezki.sort(key=lambda i: i['osnr'])
@@ -181,8 +154,6 @@ class BazaDanych():
         logger.debug("Grupa III: {z}".format(z=self.sciezki[3*rozmiar_grupy]['osnr']))
         logger.debug("Grupa IV: {z}".format(z=self.sciezki[4*rozmiar_grupy]['osnr']))
 
-        # plt.plot(x, y)
-        # plt.show()
 
     def koszt_osnr(self, odleglosc, max, min):
         """Oblicz OSNR, przedzial 0-50, im dluzsza sciezka tym mniejszy OSNR."""

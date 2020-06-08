@@ -3,7 +3,9 @@
 # Autor: Marcin Gajewski, Wojciech Wrzesien
 
 from ann import ANN
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 def main():
 
