@@ -37,115 +37,88 @@ class KNeighbours:
         """Przeprowadz analize."""
         self.przygotuj_baze()
         self.preprocessing()
-        #dane_blad = 
         self.sasiedzi()
-
-        # Wykres straty
-        #self.wykres(dane_blad['loss'], dane_blad['val_loss'], 'Wykres straty', 'Strata')
-
-        # Wykres dokladnosci
-        #self.wykres(dane_blad['accuracy'], dane_blad['val_accuracy'],
-         #           'Wykres dokladnosci', 'Dokladnosc')    
-        
-        
-        
-        
+   
         
     def sasiedzi(self):
         """Przeprowadz analize."""
       
+        min_liczba_probek=25
         
         print("kNearest")
-        # Fit regression model
         n_neighbors = 5
-    
         weights ='distance'
-        knn = neighbors.KNeighborsRegressor(n_neighbors, weights=weights)
-        model_dane=knn.fit(self.baza_trening['X'],self.baza_trening['y'] )
-        y_ = knn.fit(self.baza_trening['X'],self.baza_trening['y'] ).predict(self.baza_test['X'] )
-        #print(y_)
+        accuracyKNN=[]
+        for i in range(min_liczba_probek,len(self.baza_trening['X'])):
+            knn = neighbors.KNeighborsRegressor(n_neighbors, weights=weights)
+            model_dane=knn.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
+            y_ = knn.fit(self.baza_trening['X'][:i],self.baza_trening['y'][ : i ] ).predict(self.baza_test['X'][:i] )
+            accuracy=knn.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
+            accuracyKNN.append(accuracy)
         
-        accuracy=knn.score(self.baza_test['X'],self.baza_test['y'],sample_weight=None)
-        
-        #print('Sciezka, prawdziwa kategoria, przewidziana kategoria')
-       # for p, x, y in zip(y_, self.baza_test['X'], self.baza_test['y']):
-        #    print(x, y, p)
-        
-        #plt.subplot(2, 1, 1)
-        #print("x: ")
-        #print(self.baza_trening['X'])
-        #print("y: ")
-        #print(self.baza_trening['y'])
-        #plt.scatter(self.baza_trening['X'], self.baza_trening['y'], color='darkorange', label='data')
-        #plt.plot(self.baza_test['X'], y_, color='navy', label='prediction')
-        #plt.axis('tight')
-        #plt.legend()
-        #plt.title("KNeighborsRegressor (k = %i, weights = '%s')" % (n_neighbors,
-        #                                                        weights))
-
-        
-        print("Accuracy: ")
+        print("Accuracy KNN: ")
         print(accuracy)
         
         
-        
-        
+        ########### Extra Trees Regressor
         
         print("Extra Tress Regresor")
-    
-      
-        etr = ensemble.ExtraTreesRegressor(n_estimators=10, max_features=10, random_state=0)
-        model_dane=etr.fit(self.baza_trening['X'],self.baza_trening['y'] )
-        y_ = etr.fit(self.baza_trening['X'],self.baza_trening['y'] ).predict(self.baza_test['X'] )
-        #print(y_)
-        
-        accuracy=etr.score(self.baza_test['X'],self.baza_test['y'],sample_weight=None)
-        
-        print("Accuracy: ")
+        accuracyETR=[]
+        for i in range(min_liczba_probek,len(self.baza_trening['X'])):
+            etr = ensemble.ExtraTreesRegressor(n_estimators=10, max_features=10, random_state=0)
+            model_dane=etr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
+            y_ = etr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] ).predict(self.baza_test['X'][:i] )
+            accuracy=etr.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
+            accuracyETR.append(accuracy)           
+        print("Accuracy ETR: ")
         print(accuracy)
         
-        
-        
-        
+        ########### Linear regression
         
         print("Linear Regression")
-    
-        
-        lr = linear_model.LinearRegression()
-        model_dane=lr.fit(self.baza_trening['X'],self.baza_trening['y'] )
-        y_ = lr.fit(self.baza_trening['X'],self.baza_trening['y'] ).predict(self.baza_test['X'] )
-        #print(y_)
-        
-        accuracy=lr.score(self.baza_test['X'],self.baza_test['y'],sample_weight=None)
-        
+        accuracyLR=[]
+        for i in range(min_liczba_probek,len(self.baza_trening['X'])):
+            lr = linear_model.LinearRegression()
+            model_dane=lr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
+            y_ = lr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] ).predict(self.baza_test['X'][:i] )
+            accuracy=lr.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None) 
+            accuracyLR.append(accuracy)
         print("Accuracy: ")
         print(accuracy)
-        
-        
-        
+         
+        ########### Ridge regression
        
         print("Ridge regression")
-      
-    
-       
-        lr2 = linear_model.RidgeCV()
-        model_dane=lr2.fit(self.baza_trening['X'],self.baza_trening['y'] )
-        y_ = lr2.fit(self.baza_trening['X'],self.baza_trening['y'] ).predict(self.baza_test['X'] )
-        #print(y_)
-        
-        accuracy=lr2.score(self.baza_test['X'],self.baza_test['y'],sample_weight=None)
-        
+        accuracyRR=[]
+        for i in range(min_liczba_probek,len(self.baza_trening['X'])):
+            lr2 = linear_model.RidgeCV()
+            model_dane=lr2.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
+            y_ = lr2.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] ).predict(self.baza_test['X'][:i] )
+            accuracy=lr2.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
+            accuracyRR.append(accuracy)
         print("Accuracy: ")
         print(accuracy)
         
-  
-    
-    
-        ############################################################################
-        
-
         
         
+        """wykresy"""
+        fig, axs = plt.subplots(2, 2)
+        axs[0, 0].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyKNN)
+        axs[0, 0].set_title('K-Nearest Neighbours Regression')
+        axs[0, 1].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyETR, 'tab:orange')
+        axs[0, 1].set_title('Extra Trees Regression')
+        axs[1, 0].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyLR, 'tab:green')
+        axs[1, 0].set_title('Linear Regression')
+        axs[1, 1].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyRR, 'tab:red')
+        axs[1, 1].set_title('Ridge Regression')
+        
+        for ax in axs.flat:
+            ax.set(xlabel='size of training set', ylabel='accuracy')
+            
+        
+        for ax in fig.get_axes():
+            ax.label_outer()
+            
 
     def przygotuj_baze(self):
         """Przygotowanie bazy testowej i treningowej."""
