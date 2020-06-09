@@ -6,8 +6,6 @@ import logging
 import math
 import random
 
-# BAZA_TRENING = 0.8
-
 logger = logging.getLogger('BazaDanych')
 
 
@@ -18,14 +16,11 @@ class BazaDanych():
         self.root = self.tree.getroot()
         self.miasta = []
         self.sciezki = []
-        # self.baza_testowa = []
-        # self.baza_treningowa = []
 
     def utworz_baze(self):
         """Generowanie bazy danych."""
         self.baza_miast()
         self.baza_sciezek()
-        # self.generuj_baze()
         self.wyswietl()
         random.shuffle(self.sciezki)
 
@@ -129,16 +124,6 @@ class BazaDanych():
             if miasto['miasto'] == nazwa:
                 return miasto['id']
         return None
-
-    # def generuj_baze(self):
-    #     """Podziel baze na testowa (90% bazy) i treningowa (10% bazy)."""
-    #     count = 0
-    #     for sciezka in self.sciezki:
-    #         if count % (int(1/BAZA_TRENING)) == 0:
-    #             self.baza_treningowa.append(sciezka.copy())
-    #         else:
-    #             self.baza_testowa.append(sciezka.copy())
-    #         count += 1
 
     def wyswietl(self):
         self.sciezki.sort(key=lambda i: i['osnr'])

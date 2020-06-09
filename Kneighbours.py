@@ -12,9 +12,8 @@ import logging
 warnings.filterwarnings("ignore", message="Reloaded modules: <module_name>")
 
 GRUPA_ZAKRES = [17.04, 24.06, 29.55, 35.53]
-GRUPA_ZAKRES_2 = [19.24, 27.05, 34.01, 48]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("KNeighbours")
 logging.basicConfig(level=logging.INFO)
 
 class KNeighbours:
@@ -22,22 +21,18 @@ class KNeighbours:
         self.baza_trening = {}
         self.baza_test = {}
         self.baza = {}
-        
-        
+
     def analiza(self):
         """Przeprowadz analize."""
         self.przygotuj_baze()
         self.preprocessing()
         self.sasiedzi()
-   
-        
+
     def sasiedzi(self):
         """Przeprowadz analize."""
-      
         min_liczba_probek=25
-        
+
         ########### K-neares Neighbours Regressor
-        
         print("kNearest")
         n_neighbors = 5
         weights ='distance'
@@ -50,9 +45,8 @@ class KNeighbours:
             accuracyKNN.append(accuracy)
         print("Accuracy KNN: ")
         print(accuracy)
-        
+
         ########### Extra Trees Regressor
-        
         print("Extra Tress Regresor")
         accuracyETR=[]
         for i in range(min_liczba_probek,len(self.baza_trening['X'])):
@@ -60,25 +54,23 @@ class KNeighbours:
             model_dane=etr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
             y_ = etr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] ).predict(self.baza_test['X'][:i] )
             accuracy=etr.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
-            accuracyETR.append(accuracy)           
+            accuracyETR.append(accuracy)
         print("Accuracy ETR: ")
         print(accuracy)
-        
+
         ########### Linear regression
-        
         print("Linear Regression")
         accuracyLR=[]
         for i in range(min_liczba_probek,len(self.baza_trening['X'])):
             lr = linear_model.LinearRegression()
             model_dane=lr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] )
             y_ = lr.fit(self.baza_trening['X'][:i],self.baza_trening['y'][:i] ).predict(self.baza_test['X'][:i] )
-            accuracy=lr.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None) 
+            accuracy=lr.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
             accuracyLR.append(accuracy)
         print("Accuracy: ")
         print(accuracy)
-         
+
         ########### Ridge regression
-       
         print("Ridge regression")
         accuracyRR=[]
         for i in range(min_liczba_probek,len(self.baza_trening['X'])):
@@ -89,9 +81,7 @@ class KNeighbours:
             accuracyRR.append(accuracy)
         print("Accuracy: ")
         print(accuracy)
-        
-        
-        
+
         """wykresy"""
         fig, axs = plt.subplots(2, 2)
         axs[0, 0].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyKNN)
@@ -102,20 +92,20 @@ class KNeighbours:
         axs[1, 0].set_title('Linear Regression')
         axs[1, 1].plot(range(min_liczba_probek,len(self.baza_trening['X'])), accuracyRR, 'tab:red')
         axs[1, 1].set_title('Ridge Regression')
-        
+
         for ax in axs.flat:
             ax.set(xlabel='size of training set', ylabel='accuracy')
-            
-        
+
         for ax in fig.get_axes():
             ax.label_outer()
-            
+
+        plt.show()
 
     def przygotuj_baze(self):
         """Przygotowanie bazy testowej i treningowej."""
         baza = BazaDanych('pol.xml')
         baza.utworz_baze()
-        
+
         x = []
         y = []
         osnr = []
@@ -154,8 +144,6 @@ class KNeighbours:
                     .format(self.liczebnosc_grup(self.baza_trening['y'])))
         logger.info('Liczebnosc grup zbioru testowego: {}'
                     .format(self.liczebnosc_grup(self.baza_test['y'])))
-
- 
 
     def liczebnosc_grup(self, zbior_y):
         """Policz liczebnosc poszczegolnych grup."""
