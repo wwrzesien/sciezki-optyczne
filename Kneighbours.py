@@ -7,15 +7,9 @@ from sklearn import neighbors
 from sklearn import ensemble
 from sklearn import linear_model
 from sklearn import model_selection
-from sklearn.preprocessing import MinMaxScaler
 import warnings
 import logging
-from sklearn.ensemble import ExtraTreesRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import RidgeCV
 warnings.filterwarnings("ignore", message="Reloaded modules: <module_name>")
-
 
 GRUPA_ZAKRES = [17.04, 24.06, 29.55, 35.53]
 GRUPA_ZAKRES_2 = [19.24, 27.05, 34.01, 48]
@@ -23,12 +17,9 @@ GRUPA_ZAKRES_2 = [19.24, 27.05, 34.01, 48]
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
-
 class KNeighbours:
     def __init__(self):
         self.baza_trening = {}
-        self.baza_trening_skal = {}
         self.baza_test = {}
         self.baza = {}
         
@@ -45,6 +36,8 @@ class KNeighbours:
       
         min_liczba_probek=25
         
+        ########### K-neares Neighbours Regressor
+        
         print("kNearest")
         n_neighbors = 5
         weights ='distance'
@@ -55,10 +48,8 @@ class KNeighbours:
             y_ = knn.fit(self.baza_trening['X'][:i],self.baza_trening['y'][ : i ] ).predict(self.baza_test['X'][:i] )
             accuracy=knn.score(self.baza_test['X'][:i],self.baza_test['y'][:i],sample_weight=None)
             accuracyKNN.append(accuracy)
-        
         print("Accuracy KNN: ")
         print(accuracy)
-        
         
         ########### Extra Trees Regressor
         
@@ -159,26 +150,12 @@ class KNeighbours:
             test_size=0.1
         )
 
-        skaler = MinMaxScaler(feature_range=(0, 1))
-        self.baza_trening_skal['X'] = skaler.fit_transform(self.baza_trening['X'])
-
         logger.info('Liczebnosc grup zbioru treningowego: {}'
                     .format(self.liczebnosc_grup(self.baza_trening['y'])))
         logger.info('Liczebnosc grup zbioru testowego: {}'
                     .format(self.liczebnosc_grup(self.baza_test['y'])))
 
-
-
-    def wykres(self, dane_tren, dane_test, tytul, y_etyk):
-        """Narysuj wykres."""
-        plt.plot(dane_tren)
-        plt.plot(dane_test)
-        plt.title(tytul)
-        plt.ylabel(y_etyk)
-        plt.xlabel("Epoch")
-        plt.legend(['Trening', 'Test'])
-        plt.savefig(y_etyk + '.png')
-        plt.show()
+ 
 
     def liczebnosc_grup(self, zbior_y):
         """Policz liczebnosc poszczegolnych grup."""
