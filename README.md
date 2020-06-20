@@ -9,21 +9,31 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 Install prerequisities:
-- python >= 3.6
-- anaconda
-- tensorflow
-- keras
+- Anaconda (https://www.anaconda.com/products/individual#)
 
 ### Clone
 Clone this repo to your local machine:
 ```
-git@github.com:wwrzesien/sciezkiOptyczne.git
+git clone git@github.com:wwrzesien/sciezkiOptyczne.git
 ```
 
 ### Setup
-Create an virtual environment:
+Create a virtual environment with a specific python version:
 ```
-conda create --name myenv
+conda create --name myenv python=3.6
+```
+Activate an environment:
+```
+conda activate myenv
+```
+Install TensorFlow and Keras:
+```
+conda install tensorflow
+conda install keras
+```
+Install Matplotlib:
+```
+conda install matplotlib
 ```
 
 ### Deployment
